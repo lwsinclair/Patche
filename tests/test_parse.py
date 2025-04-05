@@ -465,21 +465,21 @@ class ParseTest(unittest.TestCase):
                             line="\tinfo = (void *)id->driver_info;",
                             hunk=1,
                         ),
-                        Change(old=1486, new=1486, line="", hunk=1),
                         Change(
-                            old=1487,
-                            new=1487,
+                            old=1486,
+                            new=1486,
                             line="\tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {",
                             hunk=1,
                         ),
                         Change(
-                            old=1488,
-                            new=1488,
+                            old=1487,
+                            new=1487,
                             line="\t\tif (desc->bNumEndpoints == 2)",
                             hunk=1,
                         ),
+                        Change(old=1488, new=None, line="-", hunk=1),
                     ],
-                    text="diff --git a/drivers/net/usb/qmi_wwan.c b/drivers/net/usb/qmi_wwan.c\nindex d080f8048e522d..8b4ad10cf9402a 100644\n--- a/drivers/net/usb/qmi_wwan.c\n+++ b/drivers/net/usb/qmi_wwan.c\n@@ -1482,7 +1482,7 @@ static int qmi_wwan_probe(struct usb_interface *intf,\n \t * different. Ignore the current interface if the number of endpoints\n \t * equals the number for the diag interface (two).\n \t */\n-\tinfo = (void *)&id->driver_info;\n+\tinfo = (void *)id->driver_info;\n \n \tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {\n \t\tif (desc->bNumEndpoints == 2)\n-- \ncgit 1.2.3-korg\n\n",
+                    text="diff --git a/drivers/net/usb/qmi_wwan.c b/drivers/net/usb/qmi_wwan.c\nindex d080f8048e522d..8b4ad10cf9402a 100644\n--- a/drivers/net/usb/qmi_wwan.c\n+++ b/drivers/net/usb/qmi_wwan.c\n@@ -1482,7 +1482,7 @@ static int qmi_wwan_probe(struct usb_interface *intf,\n \t * different. Ignore the current interface if the number of endpoints\n \t * equals the number for the diag interface (two).\n \t */\n-\tinfo = (void *)&id->driver_info;\n+\tinfo = (void *)id->driver_info;\n\n \tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {\n \t\tif (desc->bNumEndpoints == 2)\n--\ncgit 1.2.3-korg\n",
                     hunks=[
                         Hunk(
                             index=1,
@@ -511,22 +511,21 @@ class ParseTest(unittest.TestCase):
                                     line="\tinfo = (void *)id->driver_info;",
                                     hunk=1,
                                 ),
-                            ],
-                            post=[
-                                Change(old=1486, new=1486, line="", hunk=1),
                                 Change(
-                                    old=1487,
-                                    new=1487,
+                                    old=1486,
+                                    new=1486,
                                     line="\tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {",
                                     hunk=1,
                                 ),
                                 Change(
-                                    old=1488,
-                                    new=1488,
+                                    old=1487,
+                                    new=1487,
                                     line="\t\tif (desc->bNumEndpoints == 2)",
                                     hunk=1,
                                 ),
+                                Change(old=1488, new=None, line="-", hunk=1),
                             ],
+                            post=[],
                             all_=[
                                 Change(
                                     old=1482,
@@ -553,19 +552,19 @@ class ParseTest(unittest.TestCase):
                                     line="\tinfo = (void *)id->driver_info;",
                                     hunk=1,
                                 ),
-                                Change(old=1486, new=1486, line="", hunk=1),
                                 Change(
-                                    old=1487,
-                                    new=1487,
+                                    old=1486,
+                                    new=1486,
                                     line="\tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {",
                                     hunk=1,
                                 ),
                                 Change(
-                                    old=1488,
-                                    new=1488,
+                                    old=1487,
+                                    new=1487,
                                     line="\t\tif (desc->bNumEndpoints == 2)",
                                     hunk=1,
                                 ),
+                                Change(old=1488, new=None, line="-", hunk=1),
                             ],
                         )
                     ],
@@ -584,7 +583,7 @@ class ParseTest(unittest.TestCase):
             author="Bjørn Mork <bjorn@mork.no>",
             date="Mon Jun 24 18:45:11 2019 +0200",
             subject="qmi_wwan: Fix out-of-bounds read",
-            message='commit 904d88d743b0c94092c5117955eab695df8109e8\nAuthor: Bjørn Mork <bjorn@mork.no>\nDate:   Mon Jun 24 18:45:11 2019 +0200\n\n    qmi_wwan: Fix out-of-bounds read\n    \n    The syzbot reported\n    \n     Call Trace:\n      __dump_stack lib/dump_stack.c:77 [inline]\n      dump_stack+0xca/0x13e lib/dump_stack.c:113\n      print_address_description+0x67/0x231 mm/kasan/report.c:188\n      __kasan_report.cold+0x1a/0x32 mm/kasan/report.c:317\n      kasan_report+0xe/0x20 mm/kasan/common.c:614\n      qmi_wwan_probe+0x342/0x360 drivers/net/usb/qmi_wwan.c:1417\n      usb_probe_interface+0x305/0x7a0 drivers/usb/core/driver.c:361\n      really_probe+0x281/0x660 drivers/base/dd.c:509\n      driver_probe_device+0x104/0x210 drivers/base/dd.c:670\n      __device_attach_driver+0x1c2/0x220 drivers/base/dd.c:777\n      bus_for_each_drv+0x15c/0x1e0 drivers/base/bus.c:454\n    \n    Caused by too many confusing indirections and casts.\n    id->driver_info is a pointer stored in a long.  We want the\n    pointer here, not the address of it.\n    \n    Thanks-to: Hillf Danton <hdanton@sina.com>\n    Reported-by: syzbot+b68605d7fadd21510de1@syzkaller.appspotmail.com\n    Cc: Kristian Evensen <kristian.evensen@gmail.com>\n    Fixes: e4bf63482c30 ("qmi_wwan: Add quirk for Quectel dynamic config")\n    Signed-off-by: Bjørn Mork <bjorn@mork.no>\n    Signed-off-by: David S. Miller <davem@davemloft.net>\n',
+            message='commit 904d88d743b0c94092c5117955eab695df8109e8\nAuthor: Bjørn Mork <bjorn@mork.no>\nDate:   Mon Jun 24 18:45:11 2019 +0200\n\n    qmi_wwan: Fix out-of-bounds read\n\n    The syzbot reported\n\n     Call Trace:\n      __dump_stack lib/dump_stack.c:77 [inline]\n      dump_stack+0xca/0x13e lib/dump_stack.c:113\n      print_address_description+0x67/0x231 mm/kasan/report.c:188\n      __kasan_report.cold+0x1a/0x32 mm/kasan/report.c:317\n      kasan_report+0xe/0x20 mm/kasan/common.c:614\n      qmi_wwan_probe+0x342/0x360 drivers/net/usb/qmi_wwan.c:1417\n      usb_probe_interface+0x305/0x7a0 drivers/usb/core/driver.c:361\n      really_probe+0x281/0x660 drivers/base/dd.c:509\n      driver_probe_device+0x104/0x210 drivers/base/dd.c:670\n      __device_attach_driver+0x1c2/0x220 drivers/base/dd.c:777\n      bus_for_each_drv+0x15c/0x1e0 drivers/base/bus.c:454\n\n    Caused by too many confusing indirections and casts.\n    id->driver_info is a pointer stored in a long.  We want the\n    pointer here, not the address of it.\n\n    Thanks-to: Hillf Danton <hdanton@sina.com>\n    Reported-by: syzbot+b68605d7fadd21510de1@syzkaller.appspotmail.com\n    Cc: Kristian Evensen <kristian.evensen@gmail.com>\n    Fixes: e4bf63482c30 ("qmi_wwan: Add quirk for Quectel dynamic config")\n    Signed-off-by: Bjørn Mork <bjorn@mork.no>\n    Signed-off-by: David S. Miller <davem@davemloft.net>\n',
             diff=[
                 Diff(
                     header=Header(
@@ -620,21 +619,20 @@ class ParseTest(unittest.TestCase):
                             line="\tinfo = (void *)id->driver_info;",
                             hunk=1,
                         ),
-                        Change(old=1486, new=1486, line="", hunk=1),
                         Change(
-                            old=1487,
-                            new=1487,
+                            old=1486,
+                            new=1486,
                             line="\tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {",
                             hunk=1,
                         ),
                         Change(
-                            old=1488,
-                            new=1488,
+                            old=1487,
+                            new=1487,
                             line="\t\tif (desc->bNumEndpoints == 2)",
                             hunk=1,
                         ),
                     ],
-                    text="diff --git a/drivers/net/usb/qmi_wwan.c b/drivers/net/usb/qmi_wwan.c\nindex d080f8048e52..8b4ad10cf940 100644\n--- a/drivers/net/usb/qmi_wwan.c\n+++ b/drivers/net/usb/qmi_wwan.c\n@@ -1482,7 +1482,7 @@ static int qmi_wwan_probe(struct usb_interface *intf,\n \t * different. Ignore the current interface if the number of endpoints\n \t * equals the number for the diag interface (two).\n \t */\n-\tinfo = (void *)&id->driver_info;\n+\tinfo = (void *)id->driver_info;\n \n \tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {\n \t\tif (desc->bNumEndpoints == 2)\n",
+                    text="diff --git a/drivers/net/usb/qmi_wwan.c b/drivers/net/usb/qmi_wwan.c\nindex d080f8048e52..8b4ad10cf940 100644\n--- a/drivers/net/usb/qmi_wwan.c\n+++ b/drivers/net/usb/qmi_wwan.c\n@@ -1482,7 +1482,7 @@ static int qmi_wwan_probe(struct usb_interface *intf,\n \t * different. Ignore the current interface if the number of endpoints\n \t * equals the number for the diag interface (two).\n \t */\n-\tinfo = (void *)&id->driver_info;\n+\tinfo = (void *)id->driver_info;\n\n \tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {\n \t\tif (desc->bNumEndpoints == 2)\n",
                     hunks=[
                         Hunk(
                             index=1,
@@ -668,16 +666,15 @@ class ParseTest(unittest.TestCase):
                                 ),
                             ],
                             post=[
-                                Change(old=1486, new=1486, line="", hunk=1),
                                 Change(
-                                    old=1487,
-                                    new=1487,
+                                    old=1486,
+                                    new=1486,
                                     line="\tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {",
                                     hunk=1,
                                 ),
                                 Change(
-                                    old=1488,
-                                    new=1488,
+                                    old=1487,
+                                    new=1487,
                                     line="\t\tif (desc->bNumEndpoints == 2)",
                                     hunk=1,
                                 ),
@@ -708,16 +705,15 @@ class ParseTest(unittest.TestCase):
                                     line="\tinfo = (void *)id->driver_info;",
                                     hunk=1,
                                 ),
-                                Change(old=1486, new=1486, line="", hunk=1),
                                 Change(
-                                    old=1487,
-                                    new=1487,
+                                    old=1486,
+                                    new=1486,
                                     line="\tif (info->data & QMI_WWAN_QUIRK_QUECTEL_DYNCFG) {",
                                     hunk=1,
                                 ),
                                 Change(
-                                    old=1488,
-                                    new=1488,
+                                    old=1487,
+                                    new=1487,
                                     line="\t\tif (desc->bNumEndpoints == 2)",
                                     hunk=1,
                                 ),
@@ -727,7 +723,6 @@ class ParseTest(unittest.TestCase):
                 )
             ],
         )
-
         assert expected_git_patch == git_patch
 
     def test_changes_to_hunks(self) -> None:
